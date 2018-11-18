@@ -7,6 +7,8 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { CodemirrorModule } from 'ng2-codemirror';
 
+import { MatTabsModule } from '@angular/material';
+
 @NgModule({
   declarations: [
     AppComponent
@@ -15,6 +17,7 @@ import { CodemirrorModule } from 'ng2-codemirror';
     BrowserModule,
     BrowserAnimationsModule,
     ReactiveFormsModule,
+    MatTabsModule,
     CodemirrorModule
   ],
   providers: [],

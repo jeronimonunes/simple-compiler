@@ -164,7 +164,7 @@ factor_a
  }
 
 factor
- = identifier
+ = id:identifier _ !("(") { return id }
  / constant
  / "(" _ expr:expr _ ")" {
      return { type:"block", expr }

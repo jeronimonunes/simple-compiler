@@ -15,7 +15,7 @@ import { generateAST } from './ast-generator/ast.graph-generator';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
 
   @ViewChild("astDiv") astDiv: ElementRef;
 
@@ -35,7 +35,7 @@ export class AppComponent implements OnInit {
           this.network = generateAST(this.ast, this.astDiv.nativeElement);
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
         let line = "";
         let column = "";
         try {
@@ -54,7 +54,7 @@ export class AppComponent implements OnInit {
       this.parser = generate(c.value);
       this.code.updateValueAndValidity();
     } catch (e) {
-      console.log(e);
+      console.error(e);
       let line = "";
       let column = "";
       try {
@@ -85,12 +85,5 @@ export class AppComponent implements OnInit {
     readonly: true,
     mode: "application/json",
     theme: "ambiance"
-  }
-
-  ngOnInit() {
-    setTimeout(() => {
-      let e: HTMLDivElement = this.astDiv.nativeElement;
-      e.scrollIntoView();
-    })
   }
 }

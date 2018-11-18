@@ -16,10 +16,15 @@ export const factorial = `program factorial;
 teste: integer;
 integer PROCEDURE factorial(value integer: n):
 begin
-	write(' ')
+	if n < 1 then begin
+    	v := 1
+    end else begin
+    	v := factorial(n - 1)
+    end
 end
 begin
     read(teste);
-    fib(teste)
+    teste := factorial(teste);
+    write(teste)
 end
 `;

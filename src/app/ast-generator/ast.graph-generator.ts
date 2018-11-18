@@ -1,16 +1,78 @@
 import { AST, decl_list, decl, dcl_var, dcl_proc, lista_de_parametros, parametro, corpo, stmt, compound_stmt, read_stmt, write_stmt, expr, rel_expr, Simple_expr, term, factor_a, factor, identifier, block_expr, function_ref_par, constant, not_expr, assign_stmt, if_stmt, repeat_stmt } from "../ast";
 import { Network, Options, Data, DataSet, Node, Edge } from 'vis';
 
+/**
+ * Ids for the nodes on the graph
+ */
 let ID = 0;
 
+/**
+ * All functions return one of these, so it can be easylly placed on the graph
+ */
 interface Three {
   root: Node;
   nodes: Node[];
   edges: Edge[];
 }
 
+/**
+ * Function that should be placed at the end of a switch case
+ * So the compiler throw an error if not all cases have been treated
+ */
 function fail(param: never): never {
   throw new Error("Function did not treat exaustivelly all cases.");
+}
+
+/**
+ * Main method, receives an AST and plots a graph into a given HtmlDiv
+ */
+export function generateAST(ast: AST, div: HTMLDivElement) {
+
+  let options: Options = {
+    layout: {
+      randomSeed: undefined,
+      improvedLayout: true,
+      hierarchical: {
+        enabled: true,
+        levelSeparation: 150,
+        nodeSpacing: 100,
+        treeSpacing: 200,
+        blockShifting: true,
+        edgeMinimization: true,
+        parentCentralization: true,
+        direction: 'LR',
+        sortMethod: 'directed' // hubsize, directed
+      }
+    }
+  };
+
+  let declarations = decl_list(ast.declarations);
+
+  let body = compound_stmt(ast.body);
+
+  let nodes = new DataSet<Node>([
+    { id: "program", label: "PROGRAM" },
+    { id: "p-identifier", label: ast.identifier.value },
+    { id: "body", label: "BODY" },
+    ...declarations.nodes,
+    ...body.nodes
+  ])
+
+  let edges = new DataSet<Edge>([
+    { from: "program", to: "p-identifier" },
+    { from: 'p-identifier', to: declarations.root.id },
+    { from: "p-identifier", to: "body" },
+    { from: "body", to: body.root.id },
+    ...declarations.edges,
+    ...body.edges
+  ])
+
+  let data: Data = {
+    nodes,
+    edges
+  };
+
+  return new Network(div, data, options);
 }
 
 function decl_var(decl: dcl_var): Three {
@@ -61,6 +123,8 @@ function stmt(stmt: stmt): Three {
       return if_stmt(stmt);
     case "repeat":
       return repeat_stmt(stmt);
+    case "identifier":
+      return identifier(stmt);
     default:
       return fail(stmt);
   }
@@ -191,23 +255,27 @@ function block(block: block_expr) {
 }
 
 function call(call: function_ref_par) {
-  let root: Node = {
-    id: ID++,
-    label: "Call (" + call.identifier.value + ")"
-  };
-  let params: Node = {
-    id: ID++,
-    label: "PARAMS"
+  if (call.type == "call") {
+    let root: Node = {
+      id: ID++,
+      label: "Call (" + call.identifier.value + ")"
+    };
+    let params: Node = {
+      id: ID++,
+      label: "PARAMS"
+    }
+    let nodes: Node[] = [root, params];
+    let edges: Edge[] = [{ from: root.id, to: params.id }];
+    for (let p of call.params) {
+      let v = expr(p);
+      edges.push({ from: params.id, to: v.root.id });
+      edges.push(...v.edges);
+      nodes.push(...v.nodes);
+    }
+    return { root, nodes, edges };
+  } else {
+    return identifier(call);
   }
-  let nodes: Node[] = [root, params];
-  let edges: Edge[] = [{ from: root.id, to: params.id }];
-  for (let p of call.params) {
-    let v = expr(p);
-    edges.push({ from: params.id, to: v.root.id });
-    edges.push(...v.edges);
-    nodes.push(...v.nodes);
-  }
-  return { root, nodes, edges };
 }
 
 function factor(expr: factor) {
@@ -363,7 +431,7 @@ function rel_expr(expr: rel_expr): Three {
     label: "TAIL"
   }
   let head_expr = Simple_expr(expr.head);
-  let nodes: Node[] = [root];
+  let nodes: Node[] = [root, head, tail];
   let edges: Edge[] = [
     { from: root.id, to: head.id },
     { from: head.id, to: head_expr.root.id },
@@ -497,53 +565,4 @@ function decl_list(declarations: decl_list) {
     nodes,
     edges
   }
-}
-
-export function generateAST(ast: AST, div: HTMLDivElement) {
-
-  let options: Options = {
-    layout: {
-      randomSeed: undefined,
-      improvedLayout: true,
-      hierarchical: {
-        enabled: true,
-        levelSeparation: 150,
-        nodeSpacing: 100,
-        treeSpacing: 200,
-        blockShifting: true,
-        edgeMinimization: true,
-        parentCentralization: true,
-        direction: 'UD',
-        sortMethod: 'directed' // hubsize, directed
-      }
-    }
-  };
-
-  let declarations = decl_list(ast.declarations);
-
-  let body = compound_stmt(ast.body);
-
-  let nodes = new DataSet<Node>([
-    { id: "program", label: "PROGRAM" },
-    { id: "p-identifier", label: ast.identifier.value },
-    { id: "body", label: "BODY" },
-    ...declarations.nodes,
-    ...body.nodes
-  ])
-
-  let edges = new DataSet<Edge>([
-    { from: "program", to: "p-identifier" },
-    { from: 'p-identifier', to: declarations.root.id },
-    { from: "p-identifier", to: "body" },
-    { from: "body", to: body.root.id },
-    ...declarations.edges,
-    ...body.edges
-  ])
-
-  let data: Data = {
-    nodes,
-    edges
-  };
-
-  return new Network(div, data, options);
 }

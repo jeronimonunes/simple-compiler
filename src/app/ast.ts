@@ -72,7 +72,7 @@ export type Simple_expr = {
 export type term = {
     type: "term",
     head: factor_a;
-    tail: { op: "+" | "-" | "or", expr: factor_a }[];
+    tail: { op: "*" | "/" | "div" | "mod" | "and", expr: factor_a }[];
 } | factor_a;
 
 export type factor_a = {
@@ -90,13 +90,13 @@ export type not_expr = {
     factor: factor
 };
 
-export type factor = identifier | constant | block_expr | not_expr | function_ref_par;
+export type factor = constant | block_expr | not_expr | function_ref_par;
 
 export type function_ref_par = {
     type: "call",
     identifier: variable;
     params: expr_list;
-}
+} | identifier;
 
 export type variable = Simple_variable_or_proc;
 
@@ -155,10 +155,12 @@ export type tipo_retornado = "integer"
     | "char"
     | "";
 
+export type var_type = "integer" | "real" | "boolean" | "char";
+
 export type dcl_var = {
     type: "var";
     value: {
-        type: "integer" | "real" | "boolean" | "char";
+        type: var_type;
         identifier: identifier;
     }
 }
