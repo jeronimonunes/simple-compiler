@@ -135,7 +135,7 @@ export type corpo = {
 
 export type parametro = {
     mode: "value" | "reference";
-    type: "integer" | "real" | "boolean" | "char";
+    type: var_type;
     identifier: identifier;
 }
 

@@ -249,7 +249,7 @@ function read_stmt(stmt: read_stmt): Three {
   return { root, edges, nodes };
 }
 
-function identifier(identifier: identifier) {
+function identifier(identifier: identifier): Three {
   let root: Node = {
     id: ID++,
     label: "identifier: " + identifier.value
@@ -257,7 +257,7 @@ function identifier(identifier: identifier) {
   return { root, nodes: [root], edges: [] };
 }
 
-function block(block: block_expr) {
+function block(block: block_expr): Three {
   let root: Node = {
     id: ID++,
     label: "BLOCK"
@@ -266,7 +266,7 @@ function block(block: block_expr) {
   return { root, nodes: [root, ...inner.nodes], edges: [{ from: root.id, to: inner.root.id }, ...inner.edges] };
 }
 
-function call(call: function_ref_par) {
+function call(call: function_ref_par): Three {
   if (call.type == "call") {
     let root: Node = {
       id: ID++,
@@ -290,7 +290,7 @@ function call(call: function_ref_par) {
   }
 }
 
-function factor(expr: factor) {
+function factor(expr: factor): Three {
   switch (expr.type) {
     case "identifier":
       return identifier(expr);
@@ -307,7 +307,7 @@ function factor(expr: factor) {
   }
 }
 
-function not(not: not_expr) {
+function not(not: not_expr): Three {
   let root: Node = {
     id: ID++,
     label: "not"
@@ -320,7 +320,7 @@ function not(not: not_expr) {
   return { root, nodes, edges };
 }
 
-function constant(constant: constant) {
+function constant(constant: constant): Three {
   let root: Node = {
     id: ID++,
     label: constant.value.type + ": " + constant.value.value
@@ -328,13 +328,13 @@ function constant(constant: constant) {
   return { root, nodes: [root], edges: [] };
 }
 
-function factor_a(factor_a: factor_a) {
+function factor_a(factor_a: factor_a): Three {
   if (factor_a.type == "neg") {
     let root: Node = {
       id: ID++,
       label: "NEG_EXPR"
     };
-    let sub = expr(factor_a.expr);
+    let sub = factor(factor_a.expr);
     let nodes: Node[] = [root];
     let edges: Edge[] = [{ from: root.id, to: sub.root.id }];
     nodes.push(...sub.nodes);
@@ -356,30 +356,33 @@ function term(expr: term): Three {
         id: ID++,
         label: "HEAD"
       };
-      let tail: Node = {
-        id: ID++,
-        label: "TAIL"
-      }
       let head_expr = factor_a(expr.head);
-      let nodes: Node[] = [root];
+      let nodes: Node[] = [root, head];
       let edges: Edge[] = [
         { from: root.id, to: head.id },
-        { from: head.id, to: head_expr.root.id },
-        { from: root.id, to: tail.id }
+        { from: head.id, to: head_expr.root.id }
       ];
       edges.push(...head_expr.edges);
       nodes.push(...head_expr.nodes);
-      for (let v of expr.tail) {
-        let op: Node = {
+      if (expr.tail.length) {
+        let tail: Node = {
           id: ID++,
-          label: v.op
-        };
-        let tail_expr = factor_a(v.expr);
-        edges.push({ from: tail.id, to: op.id });
-        edges.push({ from: op.id, to: tail_expr.root.id });
-        edges.push(tail_expr.edges);
-        nodes.push(op);
-        nodes.push(...tail_expr.nodes);
+          label: "TAIL"
+        }
+        nodes.push(tail);
+        edges.push({ from: root.id, to: tail.id });
+        for (let v of expr.tail) {
+          let op: Node = {
+            id: ID++,
+            label: v.op
+          };
+          let tail_expr = factor_a(v.expr);
+          edges.push({ from: tail.id, to: op.id });
+          edges.push({ from: op.id, to: tail_expr.root.id });
+          edges.push(...tail_expr.edges);
+          nodes.push(op);
+          nodes.push(...tail_expr.nodes);
+        }
       }
       return { root, edges, nodes };
     default:
@@ -398,30 +401,33 @@ function Simple_expr(expr: Simple_expr): Three {
         id: ID++,
         label: "HEAD"
       };
-      let tail: Node = {
-        id: ID++,
-        label: "TAIL"
-      }
       let head_expr = term(expr.head);
-      let nodes: Node[] = [root];
+      let nodes: Node[] = [root, head];
       let edges: Edge[] = [
         { from: root.id, to: head.id },
-        { from: head.id, to: head_expr.root.id },
-        { from: root.id, to: tail.id }
+        { from: head.id, to: head_expr.root.id }
       ];
       edges.push(...head_expr.edges);
       nodes.push(...head_expr.nodes);
-      for (let v of expr.tail) {
-        let op: Node = {
+      if (expr.tail.length) {
+        let tail: Node = {
           id: ID++,
-          label: v.op
-        };
-        let tail_expr = term(v.expr);
-        edges.push({ from: tail.id, to: op.id });
-        edges.push({ from: op.id, to: tail_expr.root.id });
-        edges.push(tail_expr.edges);
-        nodes.push(op);
-        nodes.push(...tail_expr.nodes);
+          label: "TAIL"
+        }
+        nodes.push(tail);
+        edges.push({ from: root.id, to: tail.id });
+        for (let v of expr.tail) {
+          let op: Node = {
+            id: ID++,
+            label: v.op
+          };
+          let tail_expr = term(v.expr);
+          edges.push({ from: tail.id, to: op.id });
+          edges.push({ from: op.id, to: tail_expr.root.id });
+          edges.push(...tail_expr.edges);
+          nodes.push(op);
+          nodes.push(...tail_expr.nodes);
+        }
       }
       return { root, edges, nodes };
     default:
@@ -443,14 +449,18 @@ function rel_expr(expr: rel_expr): Three {
     label: "TAIL"
   }
   let head_expr = Simple_expr(expr.head);
-  let nodes: Node[] = [root, head, tail];
+  let nodes: Node[] = [root, head];
   let edges: Edge[] = [
     { from: root.id, to: head.id },
     { from: head.id, to: head_expr.root.id },
-    { from: root.id, to: tail.id }
+
   ];
   edges.push(...head_expr.edges);
   nodes.push(...head_expr.nodes);
+  if (expr.tail.length) {
+    nodes.push(tail);
+    edges.push({ from: root.id, to: tail.id });
+  }
   for (let v of expr.tail) {
     let op: Node = {
       id: ID++,
@@ -459,7 +469,7 @@ function rel_expr(expr: rel_expr): Three {
     let tail_expr = Simple_expr(v.expr);
     edges.push({ from: tail.id, to: op.id });
     edges.push({ from: op.id, to: tail_expr.root.id });
-    edges.push(tail_expr.edges);
+    edges.push(...tail_expr.edges);
     nodes.push(op);
     nodes.push(...tail_expr.nodes);
   }
@@ -516,7 +526,7 @@ function corpo(body: corpo) {
   };
   let ret: Node = {
     id: ID++,
-    label: "Return: " + (body.return || "void")
+    label: "Return: " + (body.return ? body.return.value : "void")
   }
   let nodes: Node[] = [root, ret];
   let edges: Edge[] = [{ from: root.id, to: ret.id }];

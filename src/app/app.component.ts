@@ -1,6 +1,9 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormControl, AbstractControl } from '@angular/forms';
 import '../../node_modules/codemirror/mode/pascal/pascal';
+import '../../node_modules/codemirror/addon/edit/matchbrackets';
+import '../../node_modules/codemirror/addon/hint/show-hint';
+import '../../node_modules/codemirror/mode/clike/clike';
 import '../../node_modules/codemirror/mode/pegjs/pegjs';
 import '../../node_modules/codemirror/mode/javascript/javascript';
 import { generate } from 'pegjs';
@@ -10,6 +13,7 @@ import { AST } from './ast';
 import { Network } from 'vis';
 import { generateAST } from './ast-generator/ast.graph-generator';
 import { run } from './interpreter/interpreter';
+import { cgenerate } from './cgenerator/cgenerator';
 
 @Component({
   selector: 'app-root',
@@ -37,10 +41,10 @@ export class AppComponent {
 
   run() {
     this.running = true;
-    this.output.setValue(null);
+    setTimeout(() => this.output.setValue(null));
     try {
       let result = run(this.ast, this.input.value);
-      this.output.setValue(result);
+      setTimeout(() => this.output.setValue(result));
     } catch (e) {
       console.error(e);
       this.input.markAsTouched();
@@ -85,7 +89,7 @@ export class AppComponent {
 
   //the following are methods to run when the code on the text editors change
   codeSelectorChange(c: AbstractControl) {
-    this.code.setValue(this.examples[c.value].code);
+    setTimeout(() => this.code.setValue(this.examples[c.value].code));
     return null;
   }
   frontEndChanged(c: AbstractControl) {
@@ -108,7 +112,8 @@ export class AppComponent {
     if (this.parser) {
       try {
         this.ast = this.parser.parse(c.value || "");
-        this.middle.setValue(JSON.stringify(this.ast, null, 4));
+        setTimeout(() => this.middle.setValue(JSON.stringify(this.ast, null, 4)));
+        setTimeout(() => this.c.setValue(cgenerate(this.ast)));
         if (this.astDiv) {
           if (this.network) {
             this.network.destroy();
