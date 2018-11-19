@@ -1,5 +1,5 @@
 import { AST, decl_list, decl, dcl_var, dcl_proc, lista_de_parametros, parametro, corpo, stmt, compound_stmt, read_stmt, write_stmt, expr, rel_expr, Simple_expr, term, factor_a, factor, identifier, block_expr, function_ref_par, constant, not_expr, assign_stmt, if_stmt, repeat_stmt } from "../ast";
-import { Network, Options, Data, DataSet, Node, Edge } from 'vis';
+import { Network, Options, Data, Node, Edge } from 'vis';
 
 /**
  * Ids for the nodes on the graph
@@ -29,43 +29,55 @@ function fail(param: never): never {
 export function generateAST(ast: AST, div: HTMLDivElement) {
 
   let options: Options = {
+    physics: true,
+    edges: {
+      smooth: {
+        enabled: true,
+        type: "cubicBezier",
+        forceDirection: "horizontal",
+        roundness: .6
+      },
+      arrows: { to: true }
+    },
     layout: {
-      randomSeed: undefined,
+      // randomSeed: undefined,
       improvedLayout: true,
       hierarchical: {
         enabled: true,
-        levelSeparation: 150,
-        nodeSpacing: 100,
-        treeSpacing: 200,
-        blockShifting: true,
-        edgeMinimization: true,
-        parentCentralization: true,
+        // levelSeparation: 150,
+        // nodeSpacing: 100,
+        // treeSpacing: 200,
+        // blockShifting: true,
+        // edgeMinimization: true,
+        // parentCentralization: true,
         direction: 'LR',
         sortMethod: 'directed' // hubsize, directed
       }
     }
   };
 
-  let declarations = decl_list(ast.declarations);
-
-  let body = compound_stmt(ast.body);
-
-  let nodes = new DataSet<Node>([
+  let nodes: Node[] = [
     { id: "program", label: "PROGRAM" },
     { id: "p-identifier", label: ast.identifier.value },
-    { id: "body", label: "BODY" },
-    ...declarations.nodes,
-    ...body.nodes
-  ])
+    { id: "body", label: "BODY" }
+  ];
 
-  let edges = new DataSet<Edge>([
+  let edges: Edge[] = [
     { from: "program", to: "p-identifier" },
-    { from: 'p-identifier', to: declarations.root.id },
-    { from: "p-identifier", to: "body" },
-    { from: "body", to: body.root.id },
-    ...declarations.edges,
-    ...body.edges
-  ])
+    { from: "p-identifier", to: "body" }
+  ];
+
+  if (ast.declarations) {
+    let declarations = decl_list(ast.declarations);
+    edges.push({ from: 'p-identifier', to: declarations.root.id });
+    edges.push(...declarations.edges);
+    nodes.push(...declarations.nodes);
+  }
+
+  let body = compound_stmt(ast.body);
+  edges.push({ from: "body", to: body.root.id });
+  edges.push(...body.edges);
+  nodes.push(...body.nodes);
 
   let data: Data = {
     nodes,
@@ -177,14 +189,14 @@ function if_stmt(if_stmt: if_stmt): Three {
   edges.push({ from: then.id, to: then_expr.root.id });
   nodes.push(...then_expr.nodes);
   edges.push(...then_expr.edges);
-  if (if_stmt.otherwise) {
+  if (if_stmt.else) {
     let otherwise: Node = {
       id: ID++,
       label: "OTHERWISE"
     };
     nodes.push(otherwise);
     edges.push({ from: root.id, to: otherwise.id });
-    let otherwise_expr = stmt(if_stmt.otherwise);
+    let otherwise_expr = stmt(if_stmt.else);
     edges.push({ from: otherwise.id, to: otherwise_expr.root.id });
     edges.push(...otherwise_expr.edges);
     nodes.push(...otherwise_expr.nodes);

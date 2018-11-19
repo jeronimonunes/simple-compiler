@@ -18,7 +18,7 @@ export type if_stmt = {
     type: "if";
     condition: cond;
     then: stmt;
-    otherwise?: stmt;
+    else?: stmt;
 }
 
 export type cond = expr;

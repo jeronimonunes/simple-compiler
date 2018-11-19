@@ -49,7 +49,7 @@ tipo_retornado
 
 corpo
  = ":" _ declarations:(decl_list _ ";")? _ stmt:compound_stmt _ r:id_return? {
-     return { declarations:declarations?declarations[2]:null, stmt, "return": r }
+     return { declarations:declarations?declarations[0]:null, stmt, "return": r }
  }
 
 id_return

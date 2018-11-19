@@ -1,12 +1,20 @@
 <h1>Trabalho Prático de Compiladores</h1>
-<h2>Jerônimo Nunes Rocha - 2013069108</h2>
-
+<div style="display: flex; justify-content: space-between">
+    <h2>Jerônimo Nunes Rocha - 2013069108</h2>
+    <mat-form-field>
+        <mat-select placeholder="Código de Exemplo" [formControl]="codeSelector">
+            <mat-option *ngFor="let example of examples; index as i" [value]="i">
+                {{example.name}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
 <mat-tab-group>
     <mat-tab label="Front-End">
-        <codemirror [formControl]="grammar" [config]="grammar_config">
+        <codemirror [formControl]="frontEnd" [config]="frontEnd_config">
         </codemirror>
-        <div class="error" *ngIf="grammar.hasError('parser')">
-            {{grammar.getError('parser')}}
+        <div class="error" *ngIf="frontEnd.hasError('parser')">
+            {{frontEnd.getError('parser')}}
         </div>
     </mat-tab>
     <mat-tab label="Código de Entrada">
@@ -22,5 +30,25 @@
     </mat-tab>
     <mat-tab label="Árvore de Sintaxe Abstrata">
         <div #astDiv id="astDiv"></div>
+    </mat-tab>
+    <mat-tab label="Interpretador">
+        <div style="display: flex; flex-direction: column; margin: auto">
+            <h3>{{ast?.identifier?.value}}</h3>
+            <mat-form-field>
+                <textarea rows="5" placeholder="Entrada" [formControl]="input" matInput></textarea>
+                <mat-error>
+                    {{input.getError('message')}}
+                </mat-error>
+            </mat-form-field>
+            <button style="margin: auto" mat-button mat-raised-button color="primary" [disabled]="!ast && running"
+                (click)="run()">Executar</button>
+            <mat-form-field>
+                <textarea rows="5" placeholder="Saída" [formControl]="output" matInput readonly></textarea>
+            </mat-form-field>
+        </div>
+    </mat-tab>
+    <mat-tab label="Compilado para C">
+        <codemirror [formControl]="c" [config]="c_config">
+        </codemirror>
     </mat-tab>
 </mat-tab-group>

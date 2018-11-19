@@ -17,7 +17,7 @@ class Reader {
     private input: string;
 
     constructor(input: string) {
-        this.input = input.trim();
+        this.input = (input||"").trim();
     }
 
     read(v: var_type) {
@@ -218,8 +218,9 @@ function if_stmt(if_stmt: if_stmt, scope: Scope) {
     let r = expr(if_stmt.condition, scope);
     if (r === true) {
         stmt(if_stmt.then, scope);
-    } else if (r === false && if_stmt.otherwise) {
-        stmt(if_stmt.otherwise, scope);
+    } else if (r === false) {
+        if(if_stmt.else)
+            stmt(if_stmt.else, scope);
     } else {
         throw new Error("If condition didn't returned a boolean");
     }
@@ -255,7 +256,9 @@ function call(call: function_ref_par, scope: Scope) {
         }
 
         compound_stmt(proc.body.stmt, fscope);
-        return fscope.getValue(proc.body.return);
+        if(proc.body.return) {
+            return fscope.getValue(proc.body.return);
+        }
     } else {
         return identifier(call, scope);
     }
@@ -408,7 +411,8 @@ function write_stmt(stmt: write_stmt, scope: Scope) {
     stmt.params.forEach(p => {
         let result = expr(p, scope);
         scope.write(result);
-    })
+    });
+    scope.write("\n");
 }
 
 function decl_proc(decl: dcl_proc, scope: Scope) {

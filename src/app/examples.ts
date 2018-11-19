@@ -1,30 +1,41 @@
-export const helloWorld = `program p;
-begin
-    write('h','e','l','o',' ', 'w', 'o', 'r', 'l', 'd')
-end`;
+export const examples = [
+    {
+        name: "Hello World",
+        code: `program helloWorld;
+    begin
+        write('h','e','l','o',' ', 'w', 'o', 'r', 'l', 'd')
+    end`
+    }, {
+        name: "Factorial",
+        code: `program factorial;
+        teste: integer;
+        integer PROCEDURE factorial(value integer: n):
+        v: integer;
+        begin
+            if n < 1 then begin
+                v := 1
+            end else begin
+                v := n * factorial(n - 1)
+            end
+        end
+        v
+        begin
+            read(teste);
+            teste := factorial(teste);
+            write(teste)
+        end
+        `
+    }, {
+        name: "Hello World 10",
+        code: `program helloWorld10;
+        i:integer
+        begin
+        	i := 10;
+            repeat begin
+                write('h','e','l','o',' ', 'w', 'o', 'r', 'l', 'd');
+                i := i - 1
+            end until i > 0
+        end`
+    }
 
-export const fib = `program fib;
-teste: char;
-begin
-    read(teste);
-    fib(teste)
-end
-`;
-
-
-export const factorial = `program factorial;
-teste: integer;
-integer PROCEDURE factorial(value integer: n):
-begin
-	if n < 1 then begin
-    	v := 1
-    end else begin
-    	v := factorial(n - 1)
-    end
-end
-begin
-    read(teste);
-    teste := factorial(teste);
-    write(teste)
-end
-`;
+]

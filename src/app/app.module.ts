@@ -7,7 +7,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { CodemirrorModule } from 'ng2-codemirror';
 
-import { MatTabsModule } from '@angular/material';
+import { MatTabsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatSelectModule } from '@angular/material';
 
 @NgModule({
   declarations: [
@@ -18,6 +18,10 @@ import { MatTabsModule } from '@angular/material';
     BrowserAnimationsModule,
     ReactiveFormsModule,
     MatTabsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatSelectModule,
     CodemirrorModule
   ],
   providers: [],
