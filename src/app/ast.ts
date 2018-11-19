@@ -1,3 +1,11 @@
+export interface AST {
+
+    identifier: identifier;
+    body: compound_stmt;
+    declarations?: decl_list;
+
+}
+
 export type identifier = {
     type: "identifier";
     value: string;
@@ -168,11 +176,3 @@ export type dcl_var = {
 export type decl = dcl_var | dcl_proc;
 
 export type decl_list = decl[];
-
-export interface AST {
-
-    identifier: identifier;
-    body: compound_stmt;
-    declarations?: decl_list;
-
-}
