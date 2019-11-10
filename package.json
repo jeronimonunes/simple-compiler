@@ -24,6 +24,7 @@
     "@angular/router": "~7.0.0",
     "@types/pegjs": "^0.10.1",
     "@types/vis": "^4.21.8",
+    "angular-cli-ghpages": "^0.6.0",
     "codemirror": "^5.41.0",
     "core-js": "^2.5.4",
     "ng2-codemirror": "^1.1.3",
