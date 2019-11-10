@@ -1,15 +1,6 @@
-@import '~@angular/material/theming';
 @import '~codemirror/lib/codemirror.css';
 @import '~codemirror/theme/ambiance.css';
 @import '~vis/dist/vis.css';
-
-// Define a custom typography config that overrides the font-family as well as the
-// `headlines` and `body-1` levels.
-$custom-typography: mat-typography-config(
-  $font-family: 'Roboto, monospace',
-  $headline: mat-typography-level(32px, 48px, 700),
-  $body-1: mat-typography-level(16px, 24px, 500)
-);
 
 body {
   display: flex;
@@ -24,3 +15,5 @@ mat-tab-group,.mat-tab-body-wrapper {
 .CodeMirror {
   height: calc(100vh - 49px - 32px - 16px - 32px - 16px - 1em - 1em - 48px)
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

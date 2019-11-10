@@ -22,7 +22,7 @@ import { cgenerate } from './cgenerator/cgenerator';
 })
 export class AppComponent {
 
-  @ViewChild("astDiv") astDiv: ElementRef;
+  @ViewChild("astDiv", { static: true }) astDiv: ElementRef;
   examples = examples;
 
   //The following are the inputs of the page
